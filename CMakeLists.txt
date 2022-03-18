@@ -4,6 +4,8 @@
 # SPDX-License-Identifier: BSD-2-Clause
 #
 
+# This is a dummy comment
+
 cmake_minimum_required(VERSION 3.8.2)
 
 set(configure_string "")
