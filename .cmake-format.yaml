@@ -1,0 +1,28 @@
+#
+# Copyright 2020, Data61, CSIRO (ABN 41 687 119 230)
+#
+# SPDX-License-Identifier: GPL-2.0-only
+#
+
+additional_commands:
+  config_choice:
+    pargs:
+      nargs: 3 # name, define, help
+    kwargs:
+      DEFAULT: 1
+      DEPENDS: 1
+  config_option:
+    pargs:
+      nargs: 3 # name, define, help
+    kwargs:
+      DEFAULT: 1
+      DEFAULT_DISABLED: 1
+      DEPENDS: 1
+  config_string:
+    pargs:
+      nargs: 3 # name, define, help
+    flags: [UNQUOTE]
+    kwargs:
+      DEFAULT: 1
+      DEFAULT_DISABLED: 1
+      DEPENDS: 1
