@@ -1124,9 +1124,10 @@ static memory_fault_result_t handle_on_demand_fault_callback(vm_t *vm, vm_vcpu_t
 }
 
 memory_fault_result_t unhandled_mem_fault_callback(vm_t *vm, vm_vcpu_t *vcpu,
-                                                   uintptr_t paddr, size_t len, void *cookie)
+                                                   fault_t *fault, void *cookie)
 {
 #ifdef CONFIG_VM_ONDEMAND_DEVICE_INSTALL
+    uintptr_t paddr = fault_get_address(fault);
     uintptr_t addr = PAGE_ALIGN(paddr, SIZE_BITS_TO_BYTES(seL4_PageBits));
     int mapped;
     vm_memory_reservation_t *reservation;
