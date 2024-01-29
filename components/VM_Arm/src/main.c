@@ -908,11 +908,9 @@ static int load_generated_dtb(vm_t *vm, uintptr_t paddr, void *addr, size_t size
 
 static int load_vm_images(vm_t *vm, const vm_config_t *vm_config)
 {
-    seL4_Word entry;
     seL4_Word dtb;
     int err;
 
-    /* Load kernel */
     printf("Loading Kernel: \'%s\'\n", vm_config->files.kernel);
     /* The behavior of vm_load_guest_kernel() depend on the kernel image type:
      * - binary:
@@ -933,17 +931,23 @@ static int load_vm_images(vm_t *vm, const vm_config_t *vm_config)
      * load address, so it will catch this and raise an error in this case.
      */
     guest_kernel_image_t kernel_image_info;
-    err = vm_load_guest_kernel(vm, vm_config->files.kernel, vm_config->ram.base,
+    err = vm_load_guest_kernel(vm, vm_config->files.kernel,  vm_config->ram.base,
                                0, &kernel_image_info);
     if (err) {
         ZF_LOGE("Could not load guest kernel (%d)", err);
         return -1;
     }
 
-    entry = kernel_image_info.kernel_image.load_paddr;
-    if (0 == entry) {
+    if (0 == kernel_image_info.kernel_image.load_paddr) {
         ZF_LOGE("load address for kernel is zero");
         return -1;
+    }
+
+    /* ToDo: this check look wrong */
+    if (vm->entry != kernel_image_info.kernel_image.load_paddr) {
+        ZF_LOGW("VM entry address %p does not match kernel load address %p",
+                (void *)vm->entry,
+                (void *)kernel_image_info.kernel_image.load_paddr);
     }
 
     /* generate a chosen node */
@@ -1011,7 +1015,8 @@ static int load_vm_images(vm_t *vm, const vm_config_t *vm_config)
     }
 
     /* Set boot arguments */
-    err = vcpu_set_bootargs(vm->vcpus[BOOT_VCPU], entry, MACH_TYPE, dtb);
+    ZF_LOGI("Entering VM at %p", (void *)vm->entry);
+    err = vcpu_set_bootargs(vm->vcpus[BOOT_VCPU], vm->entry, MACH_TYPE, dtb);
     if (err) {
         printf("Error: Failed to set boot arguments\n");
         return -1;
