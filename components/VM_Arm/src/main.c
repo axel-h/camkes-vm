@@ -861,10 +861,10 @@ static int vm_dtb_init(vm_t *vm, const vm_config_t *vm_config)
      * we generate must have a GIC node. Usually, it is built from the the node
      * in original DTB, thus we assume it exists here.
      */
-    int gic_offset = fdt_path_offset(gen_dtb_buf, GIC_NODE_PATH);
+    int gic_offset = fdt_path_offset(gen_dtb_buf, vm_config->dtb_node_gic);
     if (gic_offset < 0) {
         ZF_LOGE("Failed to find GIC node from path '%s' (%d)",
-                GIC_NODE_PATH, gic_offset);
+                vm_config->dtb_node_gic, gic_offset);
         return -1;
     }
     gic_phandle = fdt_get_phandle(gen_dtb_buf, gic_offset);
