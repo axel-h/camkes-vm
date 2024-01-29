@@ -693,7 +693,7 @@ static int install_vm_devices(vm_t *vm, const vm_config_t *vm_config)
     if (config_set(CONFIG_VM_PCI_SUPPORT)) {
         err = vm_install_vpci(vm, io_ports, pci);
         if (err) {
-            ZF_LOGE("Failed to install VPCI device");
+            ZF_LOGE("Failed to install VPCI device (%d)", err);
             return -1;
         }
     }
@@ -879,7 +879,8 @@ static int vm_dtb_finalize(vm_t *vm, const vm_config_t *vm_config)
          */
         int gic_offset = fdt_path_offset(fdt_ori, GIC_NODE_PATH);
         if (gic_offset < 0) {
-            ZF_LOGE("Failed to find gic node from path: %s", GIC_NODE_PATH);
+            ZF_LOGE("Failed to find gic node from path '%s' (%d)",
+                    GIC_NODE_PATH, gic_offset);
             return -1;
         }
         int gic_phandle = fdt_get_phandle(fdt_ori, gic_offset);
