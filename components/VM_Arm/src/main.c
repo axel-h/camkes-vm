@@ -1276,9 +1276,14 @@ static int main_continued(void)
 #endif
 
     /* Create CPUs and DTB node */
+    int pcpu_list_size = get_instance_size_pcpus_list();
     for (int i = 0; i < NUM_VCPUS; i++) {
         vm_vcpu_t *new_vcpu = create_vmm_plat_vcpu(&vm, VM_PRIO - 1);
         assert(new_vcpu);
+        if (i < pcpu_list_size) {
+            /* Assign VCPU to explicit physical CPU */
+            new_vcpu->target_cpu = pcpus[i];
+        }
     }
 
     if (vm_config.generate_dtb) {
@@ -1289,27 +1294,14 @@ static int main_continued(void)
         }
     }
 
-    int pcpu_assignments = 0;
-    if (get_instance_size_pcpus_list() < NUM_VCPUS) {
-        pcpu_assignments = get_instance_size_pcpus_list();
-    } else {
-        pcpu_assignments = NUM_VCPUS;
-    }
-    /* Assign vcpus to explicit pcpus */
-    for (int j = 0; j < pcpu_assignments; j++) {
-        vm.vcpus[j]->target_cpu = pcpus[j];
-    }
-
     vm_vcpu_t *vm_vcpu = vm.vcpus[BOOT_VCPU];
 
     /* Use affinity as boot core if pcpus are not specified */
-    if (0 == pcpu_assignments) {
-        err = vm_assign_vcpu_target(vm_vcpu, get_instance_affinity());
-    } else {
-        err = vm_assign_vcpu_target(vm_vcpu, vm_vcpu->target_cpu);
-    }
-
+    err = vm_assign_vcpu_target(vm_vcpu,
+                                (0 == pcpu_list_size) ? get_instance_affinity()
+                                : vm_vcpu->target_cpu);
     if (err) {
+        ZF_LOGE("Error: Failed to assign boot vcpu");
         return -1;
     }
 
