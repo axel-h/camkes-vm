@@ -707,7 +707,6 @@ static int install_vm_devices(vm_t *vm, const vm_config_t *vm_config)
     }
 
     return 0;
-
 }
 
 static int route_irq(int irq_num, vm_vcpu_t *vcpu, irq_server_t *irq_server)
