@@ -914,11 +914,35 @@ static int load_vm_images(vm_t *vm, const vm_config_t *vm_config)
 
     /* Load kernel */
     printf("Loading Kernel: \'%s\'\n", vm_config->files.kernel);
+    /* The behavior of vm_load_guest_kernel() depend on the kernel image type:
+     * - binary:
+     *   - the blob is put at the address that is passed
+     *   - load_paddr is set to vm->entry.
+     * - zImage:
+     *   - load_paddr is set to the start address in the header. If this address
+     *     is zero, then the passed load address plus an offset of 0x8000 is
+     *     used.
+     * For now, we accept a load_paddr only if it is not 0 and equal to the
+     * entry address we have set. Technically, there is no reason why a binary
+     * could not run from physical address 0 if this the guest has RAM there.
+     * But unfortunately, 0 is used to indicate an error also, so we have to
+     * reject this.
+     * The fallback to offset 0x8000 seems valid on 32-bit Linux only, but it's
+     * unclear if this works on 64-bit also, as 0x80000 is the usual offset
+     * there. For now, we add a check here, that our entry address matches the
+     * load address, so it will catch this and raise an error in this case.
+     */
     guest_kernel_image_t kernel_image_info;
     err = vm_load_guest_kernel(vm, vm_config->files.kernel, vm_config->ram.base,
                                0, &kernel_image_info);
+    if (err) {
+        ZF_LOGE("Could not load guest kernel (%d)", err);
+        return -1;
+    }
+
     entry = kernel_image_info.kernel_image.load_paddr;
-    if (!entry || err) {
+    if (0 == entry) {
+        ZF_LOGE("load address for kernel is zero");
         return -1;
     }
 
@@ -938,8 +962,12 @@ static int load_vm_images(vm_t *vm, const vm_config_t *vm_config)
         printf("Loading Initrd: \'%s\'\n", vm_config->files.initrd);
         err = vm_load_guest_module(vm, vm_config->files.initrd,
                                    vm_config->initrd_addr, 0, &initrd_image);
-        void *initrd = (void *)initrd_image.load_paddr;
-        if (!initrd || err) {
+        if (err) {
+            ZF_LOGE("Could not load guest initrd (%d)", err);
+            return -1;
+        }
+        if (0 == initrd_image.load_paddr) {
+            ZF_LOGE("load address for initrd is zero");
             return -1;
         }
         if (vm_config->generate_dtb) {
