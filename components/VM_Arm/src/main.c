@@ -16,6 +16,8 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#include <muslcsys/sys_morecore.h>
+
 #include <allocman/allocman.h>
 #include <allocman/bootstrap.h>
 #include <allocman/vka.h>
@@ -593,9 +595,6 @@ extern char __bss_start[];
 extern char _bss_end__[];
 extern char __sysinfo[];
 extern char __libc[];
-extern char morecore_area[];
-extern char morecore_size[];
-extern uintptr_t morecore_top;
 
 void reset_resources(void)
 {
@@ -619,20 +618,19 @@ void reset_resources(void)
     /* save some pieces of the bss that we actually don't want to zero */
     char save_sysinfo[4];
     char save_libc[34];
-    char save_morecore_area[4];
-    char save_morecore_size[4];
+    void *save_morecore_area;
+    size_t save_morecore_size;
     memcpy(save_libc, __libc, 34);
     memcpy(save_sysinfo, __sysinfo, 4);
-    memcpy(save_morecore_area, morecore_area, 4);
-    memcpy(save_morecore_size, morecore_size, 4);
+    sel4muslcsys_get_morecore_region(&save_morecore_area, &save_morecore_size);
+    ZF_LOGI("zero bss");
     /* zero the bss */
     memset(__bss_start, 0, (uintptr_t)_bss_end__ - (uintptr_t)__bss_start);
     /* restore these pieces */
     memcpy(__libc, save_libc, 34);
     memcpy(__sysinfo, save_sysinfo, 4);
-    memcpy(morecore_area, save_morecore_area, 4);
-    memcpy(morecore_size, save_morecore_size, 4);
-    morecore_top = (uintptr_t) &morecore_area[CONFIG_LIB_SEL4_MUSLC_SYS_MORECORE_BYTES];
+    ZF_LOGW("setup morecore again");
+    sel4muslcsys_setup_morecore_region(save_morecore_area, save_morecore_size);
 }
 
 static seL4_CPtr restart_tcb;
