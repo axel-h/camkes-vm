@@ -12,8 +12,7 @@ config_option(
     CAmkESVMGuestDMAIommu
     CAMKES_VM_GUEST_DMA_IOMMU
     "Enable DMA through the IOMMU"
-    DEFAULT
-    ON
+    DEFAULT ON
 )
 
 # Create VMM configuration library
