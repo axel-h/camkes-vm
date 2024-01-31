@@ -139,18 +139,16 @@ int get_crossvm_irq_num(void)
 
 static int _dma_morecore(size_t min_size, int cached, struct dma_mem_descriptor *dma_desc)
 {
-    static uint32_t _vaddr = DMA_VSTART;
-    struct seL4_ARM_Page_GetAddress getaddr_ret;
-    seL4_CPtr frame;
-    seL4_CPtr pd;
-    vka_t *vka;
     int err;
 
-    pd = simple_get_pd(&_simple);
-    vka = &_vka;
+    vka_t *vka = &_vka;
+    seL4_CPtr pd = simple_get_pd(&_simple);
+
+    /* Ths is called multiple time and _vaddr is incremented each time. */
+    static uint32_t _vaddr = DMA_VSTART;
 
     /* Create a frame */
-    frame = vka_alloc_frame_leaky(vka, seL4_PageBits);
+    seL4_CPtr frame = vka_alloc_frame_leaky(vka, seL4_PageBits);
     assert(frame);
     if (!frame) {
         return -1;
@@ -182,7 +180,7 @@ static int _dma_morecore(size_t min_size, int cached, struct dma_mem_descriptor 
     }
 
     /* Find the physical address of the page */
-    getaddr_ret = seL4_ARM_Page_GetAddress(frame);
+    struct seL4_ARM_Page_GetAddress getaddr_ret = seL4_ARM_Page_GetAddress(frame);
     assert(!getaddr_ret.error);
     /* Setup dma memory description */
     dma_desc->vaddr = _vaddr;
