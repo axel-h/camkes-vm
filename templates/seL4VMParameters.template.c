@@ -7,6 +7,7 @@
 
 #include <camkes.h>
 #include <arm_vm/gen_config.h>
+#include <vmlinux.h>
 
 /*- set config = configuration[me.name] -*/
 /*- if not config -*/
@@ -23,6 +24,8 @@
 /*- set entry_offset = 0x80000 if is_64_bit else 0x8000 -*/
 
 const vm_config_t vm_config = {
+
+    .dtb_node_gic = GIC_NODE_PATH,
 
 /*- if vm_address_config -*/
 

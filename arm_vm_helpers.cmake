@@ -45,10 +45,18 @@ function(DeclareCAmkESARMVM init_component)
         vm_src
         ${ARM_VM_PROJECT_DIR}/components/VM_Arm/src/main.c
         ${ARM_VM_PROJECT_DIR}/components/VM_Arm/src/fdt_manipulation.c
-        ${ARM_VM_PROJECT_DIR}/components/VM_Arm/src/crossvm.c
         ${ARM_VM_PROJECT_DIR}/components/VM_Arm/src/modules/map_frame_hack.c
         ${ARM_VM_PROJECT_DIR}/components/VM_Arm/src/modules/init_ram.c
     )
+
+    if(VmPCISupport)
+        list(
+            APPEND
+                vm_src
+                # Currently, there the cross vm connection to built on top of PCI
+                ${ARM_VM_PROJECT_DIR}/components/VM_Arm/src/crossvm.c
+        )
+    endif()
 
     if(VmVirtUart)
         list(APPEND vm_src ${ARM_VM_PROJECT_DIR}/components/VM_Arm/src/modules/vuart_init.c)
