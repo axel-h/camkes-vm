@@ -22,7 +22,43 @@
 /*- set is_64_bit = (8 == macros.get_word_size(options.architecture)) -*/
 /*- set entry_offset = 0x80000 if is_64_bit else 0x8000 -*/
 
+/* base_prio and num_vcpus are optional attributes of the VM component. */
+//extern const int __attribute__((weak)) base_prio;
+//extern const int __attribute__((weak)) num_vcpus;
+
+/*
+ * 'dtb': <camkes.internal.frozendict.frozendict object at 0x7f2918352bb0>,
+ * 'mmios': ('0x08040000:0x1000:12',),
+ * 'untyped_mmios': ('0x40000000:29',),
+ * 'linux_address_config': <camkes.internal.frozendict.frozendict object at 0x7f2918352c70>,
+ * 'vm_address_config': <camkes.internal.frozendict.frozendict object at 0x7f2918352cd0>,
+ * 'vm_image_config': <camkes.internal.frozendict.frozendict object at 0x7f2918352d30>,
+ * 'num_vcpus': 1,
+ * 'base_prio': 100,
+ * '_priority': 101,
+ * 'num_extra_frame_caps': 0,
+ * 'extra_frame_map_address': 0,
+ * 'cnode_size_bits': 23,
+ * 'simple_untyped24_pool': 12,
+ * 'asid_pool': 1,
+ * 'global_endpoint_base': 134217728,
+ * 'simple': 1,
+ * 'sem_value': 0,
+ * 'heap_size': 3145728,
+ * 'fs_shmem_size': 1048576,
+ * 'serial_layout': []
+ *
+ */
+
+// /*? config ?*/
+
+
 const vm_config_t vm_config = {
+
+    .extra_frame = {
+        .num_caps = num_extra_frame_caps,
+        .map_address = extra_frame_map_adress,
+    },
 
 /*- if vm_address_config -*/
 

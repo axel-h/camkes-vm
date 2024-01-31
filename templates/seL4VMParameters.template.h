@@ -14,6 +14,11 @@
 typedef struct {
 
     struct {
+        unsigned int num_caps;
+        unsigned int map_address;
+    } extra_frame;
+
+    struct {
         uintptr_t phys_base;
         uintptr_t base;
         size_t size;
