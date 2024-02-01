@@ -14,6 +14,11 @@
 typedef struct {
 
     struct {
+        unsigned int num;
+        unsigned int boot;
+    } vcpus
+
+    struct {
         uintptr_t phys_base;
         uintptr_t base;
         size_t size;
@@ -42,3 +47,5 @@ typedef struct {
 } vm_config_t;
 
 extern const vm_config_t vm_config;
+
+int get_instance_size_pcpus_list(void);
